@@ -23,6 +23,7 @@ class Window(QWidget):
         self.height = height
         self.width = width
         self.index = 0
+        self.colorIndex = 0
         self.leftBreak = 0
         self.rightBreak = 4
         self.bigPixList = []
@@ -145,13 +146,14 @@ class Window(QWidget):
         if(tmpPixmap.width() > self.width / 6 - 10):
             tmpPixmap = tmpPixmap.scaledToWidth(self.width / 6 - 10)
         self.pixList.append(tmpPixmap)
-        for i in range(-5,0,1):
-            self.label[i + 5].setPixmap(self.pixList[i % len(self.pixList)])
-            self.label[self.index % 5].setStyleSheet('background-color: red')
+        for i in range(-1,4,1):
+            self.label[i + 1].setPixmap(self.pixList[i % len(self.pixList)])
+            self.label[self.colorIndex].setStyleSheet('background-color: red')
             self.index = -1
-            self.leftBreak = -5
-            self.rightBreak = -1
-            self.label[4].setStyleSheet('background-color: blue')
+            self.colorIndex = 0
+            self.leftBreak = -1
+            self.rightBreak = 3
+            self.label[self.colorIndex].setStyleSheet('background-color: blue')
         self.tagLabels.append(self.tagLabels[i])
         self.tagLabels[-1 % len(self.pixList)].setText("")
         self.bigLabel.setPixmap(self.bigPixList[-1 % len(self.pixList)])
@@ -222,7 +224,10 @@ class Window(QWidget):
         if(self.mode == 1):
             self.tagLabels[self.index % len(self.pixList)].hide()
             self.tagLabels[(self.index - 1) % len(self.pixList)].show()
-        self.label[self.index % 5].setStyleSheet('background-color:red')
+        self.label[self.colorIndex].setStyleSheet('background-color:red')
+        self.colorIndex = self.colorIndex -1
+        if(self.colorIndex < 0):
+            self.colorIndex = 4
         self.index = self.index - 1
         if(self.index < self.leftBreak):
             self.leftBreak = self.leftBreak - 5
@@ -231,7 +236,7 @@ class Window(QWidget):
                 self.label[j].setPixmap(self.pixList[i % len(self.pixList)])
                 self.label[j].setAlignment(Qt.AlignCenter)
                 j = j + 1
-        self.label[self.index % 5].setStyleSheet('background-color: blue')
+        self.label[self.colorIndex].setStyleSheet('background-color: blue')
         self.bigLabel.setPixmap(self.bigPixList[self.index % len(self.pixList)])
         self.textBox.setText("")
     #Moves the pointer one picture to the right.  If it breaks the bounds of QLabel it will move the frame
@@ -240,7 +245,10 @@ class Window(QWidget):
         if(self.mode == 1):
             self.tagLabels[self.index % len(self.pixList)].hide()
             self.tagLabels[(self.index + 1) % len(self.pixList)].show()
-        self.label[self.index % 5].setStyleSheet('background-color: red')
+        self.label[self.colorIndex].setStyleSheet('background-color: red')
+        self.colorIndex = self.colorIndex + 1
+        if(self.colorIndex > 4):
+            self.colorIndex = 0
         self.index = self.index + 1
         if(self.index > self.rightBreak):
             self.leftBreak = self.leftBreak + 5
@@ -249,7 +257,7 @@ class Window(QWidget):
                 self.label[j].setPixmap(self.pixList[i % len(self.pixList)])
                 self.label[j].setAlignment(Qt.AlignCenter)
                 j = j + 1
-        self.label[self.index % 5].setStyleSheet('background-color: blue')
+        self.label[self.colorIndex].setStyleSheet('background-color: blue')
         self.bigLabel.setPixmap(self.bigPixList[self.index % len(self.pixList)])
         self.textBox.setText("")
     #Zooms in on the specific picture selected and puts it into a 700 x 500 frame    
