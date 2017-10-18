@@ -12,6 +12,8 @@ Last edited: 10/11/17
 import sys
 import urllib.request
 import os
+import json
+import requests
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QAction, QLineEdit, QMessageBox
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt, QUrl
@@ -26,6 +28,7 @@ class Window(QWidget):
         self.colorIndex = 0
         self.leftBreak = 0
         self.rightBreak = 4
+        self.newImages = []
         self.bigPixList = []
         self.pixList = []
         self.label = []
@@ -48,7 +51,7 @@ class Window(QWidget):
         self.saveTagButton = QPushButton('Save All Tags', self)
         self.saveTagButton.setStyleSheet("background-color: rgb(125, 125, 125);")
         self.saveTagButton.move(self.width / 6 + 75, self.height * 15 / 16)
-        self.saveTagButton.clicked.connect(self.saveClick)
+        self.saveTagButton.clicked.connect(self.saveTagClick)
         self.saveTagButton.hide()
         self.searchBar = QLineEdit(self)
         self.searchBar.setStyleSheet("color: rgb(255, 255,255);")
@@ -73,6 +76,7 @@ class Window(QWidget):
         self.deleteButton.clicked.connect(self.deleteClick)
         self.searchButton = QPushButton('Search', self)
         self.searchButton.setStyleSheet("background-color: rgb(125, 125, 125);")
+        self.searchButton.clicked.connect(self.searchClick)
         self.searchButton.move(self.width/6 +325, self.height * 29 / 32)
         self.searchResults = QLineEdit(self)
         self.searchResults.setStyleSheet("background-color: rgb(255, 255, 255);")
@@ -124,7 +128,7 @@ class Window(QWidget):
             self.warningMessage.hide()
         else:
             self.warningMessage.show()
-    def saveClick(self):
+    def saveTagClick(self):
         f = open('SavedTags.txt','w')
         f.truncate()
         for i in range(0, len(self.pixList), 1):
@@ -136,6 +140,7 @@ class Window(QWidget):
         url_data = urllib.request.urlopen(path).read()
         tmpPixmap = QPixmap()
         tmpPixmap.loadFromData(url_data)
+        self.newImages.append(tmpPixmap)
         if(tmpPixmap.height() > self.height * 3 / 4):
             tmpPixmap = tmpPixmap.scaledToHeight(self.height * 3 / 4)
         if(tmpPixmap.width() > self.width * 3 / 4):
@@ -151,8 +156,8 @@ class Window(QWidget):
             self.label[self.colorIndex].setStyleSheet('background-color: red')
             self.index = -1
             self.colorIndex = 0
-            self.leftBreak = -5
-            self.rightBreak = -1
+            self.leftBreak = -1
+            self.rightBreak = 3
             self.label[self.colorIndex].setStyleSheet('background-color: blue')
         self.tagLabels.append(self.tagLabels[i])
         self.tagLabels[-1 % len(self.pixList)].setText("")
@@ -160,10 +165,18 @@ class Window(QWidget):
         self.setFocus()
     def saveClick(self):
         print("save")
+        tempString = "SavedPic"
+        self.saveTagClick()
+        for i in range(0, len(self.newImages), 1):
+            tempString = tempString + str(len(self.pixList) + i)
+            self.newImages[i].save(tempString)
+            tempString = "SavedPic"
     def exitClick(self):
         sys.exit()
     def deleteClick(self):
         print("Delete")
+    def searchClick(self):
+        print("Search")
     def initUI(self):
         # title of window
         self.setWindowTitle('PyQt5 Main Window')
