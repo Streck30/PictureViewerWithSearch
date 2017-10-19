@@ -167,13 +167,19 @@ class Window(QWidget):
         tempString = "SavedPic"
         self.saveTagClick()
         for i in range(0, len(self.newImages), 1):
-            tempString = tempString + str(len(self.pixList) + i)
+            tempString = tempString + str(len(self.pixList)-len(self.newImages) + i)
+            f = open(tempString, 'w')
             self.newImages[i].save(tempString)
             tempString = "SavedPic"
     def exitClick(self):
         sys.exit()
     def deleteClick(self):
-        print("Delete")
+        del self.pixList[self.index % len(self.pixList)]
+        del self.bigPixList[self.index % len(self.pixList)]
+        self.bigLabel.setPixmap(self.bigPixList[self.index % len(self.pixList)])
+        for i in range(0, 5, 1):
+            self.label[i].setPixmap(self.pixList[i + self.leftBreak])
+        self.setFocus()
     def searchClick(self):
         print("Search")
     def initUI(self):
