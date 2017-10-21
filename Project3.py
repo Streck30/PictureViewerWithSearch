@@ -162,18 +162,22 @@ class Window(QWidget):
         self.pixList.append(tmpPixmap)
         for i in range(-1,4,1):
             self.label[i + 1].setPixmap(self.pixList[i % len(self.pixList)])
-            self.label[self.colorIndex].setStyleSheet('background-color: red')
-            self.index = -1
-            self.colorIndex = 0
-            self.leftBreak = -1
-            self.rightBreak = 3
-            self.label[self.colorIndex].setStyleSheet('background-color: blue')
+        self.label[self.colorIndex].setStyleSheet('background-color: red')
+        self.index = -1
+        self.colorIndex = 0
+        self.leftBreak = -1
+        self.rightBreak = 3
+        self.label[self.colorIndex].setStyleSheet('background-color: blue')
         self.tagLabels.append(self.tagLabels[i])
         self.tagLabels[-1 % len(self.pixList)].setText("")
         self.bigLabel.setPixmap(self.bigPixList[-1 % len(self.pixList)])
         self.setFocus()
     def saveClick(self):
-        print("save")
+        f = open('SavedURLS.txt','w')
+        f.truncate()
+        f.write(self.saveURL)
+        self.saveTags()
+        self.setFocus()
     def exitClick(self):
         sys.exit()
     def deleteClick(self):
@@ -185,9 +189,11 @@ class Window(QWidget):
         self.setFocus()
     def searchClick(self):
         self.index = len(self.pixList)
+        self.leftBreak = self.index
+        self.rightBreak = self.index + 4
         self.label[self.colorIndex].setStyleSheet('background-color: red')
         self.colorIndex = 0
-
+        self.label[0].setStyleSheet('background-color: blue')
         tempStr = self.searchBar.text()
         tempStr.replace(" ", "%20")
         self.searchBar.setText("")
@@ -198,7 +204,6 @@ class Window(QWidget):
         req = req + '&api_key=a0ab0abe9800e8352ae0364a9b595cd2'
         req = req + '&tags=' + tempStr
         jsonRespDict = requests.get(req).json()
-        print(jsonRespDict)
         photoset = jsonRespDict['photos']
         for p in photoset['photo']:
             farm = p['farm']
@@ -211,6 +216,23 @@ class Window(QWidget):
             url_data = urllib.request.urlopen(tempStr).read()
             tmpPixmap = QPixmap()
             tmpPixmap.loadFromData(url_data)
+            if(tmpPixmap.height() > self.height * 3 / 4):
+                tmpPixmap = tmpPixmap.scaledToHeight(self.height * 3 / 4)
+            if(tmpPixmap.width() > self.width * 3 / 4):
+                tmpPixmap = tmpPixmap.scaledToWidth(self.width * 3 / 4)
+            self.bigPixList.append(tmpPixmap)
+            if(tmpPixmap.height() > self.height / 6 - 10):
+                tmpPixmap = tmpPixmap.scaledToHeight(self.height / 6 - 10)
+            if(tmpPixmap.width() > self.width / 6 - 10):
+                tmpPixmap = tmpPixmap.scaledToWidth(self.width / 6 - 10)
+            self.pixList.append(tmpPixmap)
+            self.tagLabels.append(self.tagLabels[0])
+        for i in range(self.index, len(self.pixList), 1):
+            self.tagLabels[i].setText("")
+        for i in range(self.index, self.index + 5, 1):
+            self.label[i-self.index].setPixmap(self.pixList[i % len(self.pixList)])
+        self.bigLabel.setPixmap(self.bigPixList[self.index % len(self.pixList)])
+        self.setFocus()
     def initUI(self):
         # title of window
         self.setWindowTitle('PyQt5 Main Window')
@@ -252,8 +274,29 @@ class Window(QWidget):
         for i in range(0, 5, 1):
             self.label[i].setPixmap(self.pixList[i])
             self.label[i].setAlignment(Qt.AlignCenter)
+        self.loadURLS()
         self.show()
         self.loadTags()
+    def loadURLS(self):
+        f = open('SavedURLS.txt','r')
+        tempString = f.read()
+        self.savedURLS = tempString
+        tempString2 = tempString.split("\n")
+        for i in range(0, len(tempString2)-1, 1):
+            url_data = urllib.request.urlopen(tempString2[i]).read()
+            tmpPixmap = QPixmap()
+            tmpPixmap.loadFromData(url_data)
+            if(tmpPixmap.height() > self.height * 3 / 4):
+                tmpPixmap = tmpPixmap.scaledToHeight(self.height * 3 / 4)
+            if(tmpPixmap.width() > self.width * 3 / 4):
+                tmpPixmap = tmpPixmap.scaledToWidth(self.width * 3 / 4)
+            self.bigPixList.append(tmpPixmap)
+            if(tmpPixmap.height() > self.height / 6 - 10):
+                tmpPixmap = tmpPixmap.scaledToHeight(self.height / 6 - 10)
+            if(tmpPixmap.width() > self.width / 6 - 10):
+                tmpPixmap = tmpPixmap.scaledToWidth(self.width / 6 - 10)
+            self.pixList.append(tmpPixmap)
+            self.tagLabels.append(self.tagLabels[0])
     def loadTags(self):
         f = open('SavedTags.txt','r')
         tempString = f.read()
@@ -264,7 +307,6 @@ class Window(QWidget):
             else:
                 self.tagLabels[j].setText(self.currentString[j])
                 j = j + 1
-
     #Moves the pointer to the picture one to the left.  If it breaks the bounds, it will move the frame
     def moveIndexLeft(self):
         j = 0
