@@ -24,19 +24,28 @@ class Window(QWidget):
         super().__init__()
         self.height = height
         self.width = width
+        #index for the navigation
         self.index = 0
+        #index for changing the color of the selected image
         self.colorIndex = 0
+        #determines when to load new images
         self.leftBreak = 0
         self.rightBreak = 4
-        self.newImages = []
+        #large zoomed in image list
         self.bigPixList = []
+        #thumbnail image list
         self.pixList = []
+        #labels to store thumbnails
         self.label = []
+        #labels to store tags
         self.tagLabels = []
+        #big label for zoomed in image
         self.bigLabel = QLabel(self)
         self.bigLabel.resize(self.width * 3 / 4, self.height * 3 / 4)
         self.bigLabel.move(self.width / 8, self.height / 8)
         self.bigLabel.hide()
+        #for saving all of the search images
+        self.saveURL = ""
         #adding buttons and textbox
         self.textBox = QLineEdit(self)
         self.textBox.setStyleSheet("color: rgb(255, 255, 255);")
@@ -137,10 +146,10 @@ class Window(QWidget):
     def testClick(self):
         path = self.searchBar.text()
         self.searchBar.setText("")
+        self.saveURL = self.saveURL + path + "\n"
         url_data = urllib.request.urlopen(path).read()
         tmpPixmap = QPixmap()
         tmpPixmap.loadFromData(url_data)
-        self.newImages.append(tmpPixmap)
         if(tmpPixmap.height() > self.height * 3 / 4):
             tmpPixmap = tmpPixmap.scaledToHeight(self.height * 3 / 4)
         if(tmpPixmap.width() > self.width * 3 / 4):
@@ -164,13 +173,7 @@ class Window(QWidget):
         self.bigLabel.setPixmap(self.bigPixList[-1 % len(self.pixList)])
         self.setFocus()
     def saveClick(self):
-        tempString = "SavedPic"
-        self.saveTagClick()
-        for i in range(0, len(self.newImages), 1):
-            tempString = tempString + str(len(self.pixList)-len(self.newImages) + i)
-            f = open(tempString, 'w')
-            self.newImages[i].save(tempString)
-            tempString = "SavedPic"
+        print("save")
     def exitClick(self):
         sys.exit()
     def deleteClick(self):
@@ -178,9 +181,36 @@ class Window(QWidget):
         del self.bigPixList[self.index % len(self.pixList)]
         self.bigLabel.setPixmap(self.bigPixList[self.index % len(self.pixList)])
         for i in range(0, 5, 1):
-            self.label[i].setPixmap(self.pixList[i + self.leftBreak + 1])
+            self.label[i].setPixmap(self.pixList[i + self.leftBreak])
+        self.setFocus()
     def searchClick(self):
-        print("Search")
+        self.index = len(self.pixList)
+        self.label[self.colorIndex].setStyleSheet('background-color: red')
+        self.colorIndex = 0
+
+        tempStr = self.searchBar.text()
+        tempStr.replace(" ", "%20")
+        self.searchBar.setText("")
+        req = 'https://api.flickr.com/services/rest/'
+        req = req + '?method=flickr.photos.search'
+        req = req + '&per_page=' + self.searchResults.text()
+        req = req + '&format=json&nojsoncallback=1'
+        req = req + '&api_key=a0ab0abe9800e8352ae0364a9b595cd2'
+        req = req + '&tags=' + tempStr
+        jsonRespDict = requests.get(req).json()
+        print(jsonRespDict)
+        photoset = jsonRespDict['photos']
+        for p in photoset['photo']:
+            farm = p['farm']
+            server = p['server']
+            eyedee = p['id']
+            secret = p['secret']
+            tempStr = "http://farm" +str(farm) + ".static.flickr.com/" + str(server) + "/" + str(eyedee) + "_" + str(secret) + ".jpg"
+            print(tempStr)
+            self.saveURL = self.saveURL + tempStr + "\n"
+            url_data = urllib.request.urlopen(tempStr).read()
+            tmpPixmap = QPixmap()
+            tmpPixmap.loadFromData(url_data)
     def initUI(self):
         # title of window
         self.setWindowTitle('PyQt5 Main Window')
@@ -318,8 +348,9 @@ class Window(QWidget):
     def shiftLeft(self):
         if(self.mode == 1):
             self.tagLabels[self.index % len(self.pixList)].hide()
-        self.label[self.index % 5].setStyleSheet('background-color:red')
+        self.label[self.colorIndex].setStyleSheet('background-color:red')
         j = 0
+        self.colorIndex = 0
         self.index = self.leftBreak - 1
         if(self.mode == 1):
             self.tagLabels[self.index % len(self.pixList)].show()
@@ -328,14 +359,15 @@ class Window(QWidget):
         for i in range(self.leftBreak, 1 + self.rightBreak, 1):
             self.label[j].setPixmap(self.pixList[i % len(self.pixList)])
             j = j + 1
-        self.label[self.index % 5].setStyleSheet('background-color: blue')
+        self.label[0].setStyleSheet('background-color: blue')
         self.bigLabel.setPixmap(self.bigPixList[self.index % len(self.pixList)])
         self.textBox.setText("")
     #shifts the frame 5 pictures to the right
     def shiftRight(self):
         if(self.mode == 1):
             self.tagLabels[self.index % len(self.pixList)].hide()
-        self.label[self.index % 5].setStyleSheet('background-color: red')
+        self.label[self.colorIndex].setStyleSheet('background-color: red')
+        self.colorIndex = 0
         j = 0
         self.index = self.rightBreak + 1
         if(self.mode == 1):
@@ -345,7 +377,7 @@ class Window(QWidget):
         for i in range(self.leftBreak, 1 + self.rightBreak, 1):
             self.label[j].setPixmap(self.pixList[i % len(self.pixList)])
             j = j + 1
-        self.label[self.index % 5].setStyleSheet('background-color: blue')
+        self.label[0].setStyleSheet('background-color: blue')
         self.bigLabel.setPixmap(self.bigPixList[self.index % len(self.pixList)])
         self.textBox.setText("")
     #all of the key inputs and their responses in functions
