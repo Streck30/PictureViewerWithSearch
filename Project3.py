@@ -143,6 +143,7 @@ class Window(QWidget):
         for i in range(0, len(self.pixList), 1):
             f.write(self.tagLabels[i].text())
             f.write("#")
+    #takes a URL entered into the search bar and adds an image to the two pixmap lists.  It also appends the URL onto the saved URLs string if the user wants to save them later    
     def testClick(self):
         path = self.searchBar.text()
         self.searchBar.setText("")
@@ -172,14 +173,17 @@ class Window(QWidget):
         self.tagLabels[-1 % len(self.pixList)].setText("")
         self.bigLabel.setPixmap(self.bigPixList[-1 % len(self.pixList)])
         self.setFocus()
+    #saves all the URLS searched for into a text file separated by a new line
     def saveClick(self):
         f = open('SavedURLS.txt','w')
         f.truncate()
         f.write(self.saveURL)
         self.saveTags()
         self.setFocus()
+    #exits the program
     def exitClick(self):
         sys.exit()
+    #simply deletes the image out of the array and fixes it so that the images get truncated to fit
     def deleteClick(self):
         del self.pixList[self.index % len(self.pixList)]
         del self.bigPixList[self.index % len(self.pixList)]
@@ -187,6 +191,7 @@ class Window(QWidget):
         for i in range(0, 5, 1):
             self.label[i].setPixmap(self.pixList[i + self.leftBreak])
         self.setFocus()
+    #searches using the flickr API and json responses. Stores those images in the same two pixmap lists and appends the URLS to the saved urls string if the user wants to save them
     def searchClick(self):
         self.index = len(self.pixList)
         self.leftBreak = self.index
@@ -277,6 +282,7 @@ class Window(QWidget):
         self.loadURLS()
         self.show()
         self.loadTags()
+    #Loads URLS from the text file and places them into the pixmap array
     def loadURLS(self):
         f = open('SavedURLS.txt','r')
         tempString = f.read()
@@ -297,6 +303,7 @@ class Window(QWidget):
                 tmpPixmap = tmpPixmap.scaledToWidth(self.width / 6 - 10)
             self.pixList.append(tmpPixmap)
             self.tagLabels.append(self.tagLabels[0])
+    #loads all saved tags
     def loadTags(self):
         f = open('SavedTags.txt','r')
         tempString = f.read()
