@@ -483,6 +483,7 @@ class Window(QWidget):
                     self.label[self.index % 5].setStyleSheet('background-color:red')
                     self.mode = 1
                     self.index = self.leftBreak + setPicTo
+                    self.colorIndex = setPicTo
                     self.label[self.index % 5].setStyleSheet('background-color:blue')
                     self.bigLabel.setPixmap(self.bigPixList[self.index % len(self.pixList)])
                     for i in range(0, 5, 1):
