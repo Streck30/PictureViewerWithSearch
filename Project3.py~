@@ -302,7 +302,14 @@ class Window(QWidget):
             if(tmpPixmap.width() > self.width / 6 - 10):
                 tmpPixmap = tmpPixmap.scaledToWidth(self.width / 6 - 10)
             self.pixList.append(tmpPixmap)
-            self.tagLabels.append(self.tagLabels[0])
+            self.tagLabels.append(QLabel(self))
+            self.currentString.append("")
+            self.tagLabels[len(self.pixList)-1].resize(self.width / 8, self.height)
+            self.tagLabels[len(self.pixList)-1].move(self.width * 7 / 8, 0)
+            self.tagLabels[len(self.pixList)-1].setStyleSheet('border-color: grey; border-style: outset; border-width: 5px; font:bold 14px; color: white')
+            self.tagLabels[len(self.pixList)-1].setAlignment(Qt.AlignTop)
+            self.tagLabels[len(self.pixList)-1].hide()
+
     #loads all saved tags
     def loadTags(self):
         f = open('SavedTags.txt','r')
@@ -483,6 +490,7 @@ class Window(QWidget):
                     self.label[self.index % 5].setStyleSheet('background-color:red')
                     self.mode = 1
                     self.index = self.leftBreak + setPicTo
+                    self.colorIndex = setPicTo
                     self.label[self.index % 5].setStyleSheet('background-color:blue')
                     self.bigLabel.setPixmap(self.bigPixList[self.index % len(self.pixList)])
                     for i in range(0, 5, 1):

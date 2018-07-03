@@ -143,6 +143,7 @@ class Window(QWidget):
         for i in range(0, len(self.pixList), 1):
             f.write(self.tagLabels[i].text())
             f.write("#")
+        self.setFocus()
     #takes a URL entered into the search bar and adds an image to the two pixmap lists.  It also appends the URL onto the saved URLs string if the user wants to save them later    
     def testClick(self):
         path = self.searchBar.text()
@@ -302,7 +303,14 @@ class Window(QWidget):
             if(tmpPixmap.width() > self.width / 6 - 10):
                 tmpPixmap = tmpPixmap.scaledToWidth(self.width / 6 - 10)
             self.pixList.append(tmpPixmap)
-            self.tagLabels.append(self.tagLabels[0])
+            self.tagLabels.append(QLabel(self))
+            self.currentString.append("")
+            self.tagLabels[len(self.pixList)-1].resize(self.width / 8, self.height)
+            self.tagLabels[len(self.pixList)-1].move(self.width * 7 / 8, 0)
+            self.tagLabels[len(self.pixList)-1].setStyleSheet('border-color: grey; border-style: outset; border-width: 5px; font:bold 14px; color: white')
+            self.tagLabels[len(self.pixList)-1].setAlignment(Qt.AlignTop)
+            self.tagLabels[len(self.pixList)-1].hide()
+
     #loads all saved tags
     def loadTags(self):
         f = open('SavedTags.txt','r')
