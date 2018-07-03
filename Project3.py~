@@ -143,6 +143,7 @@ class Window(QWidget):
         for i in range(0, len(self.pixList), 1):
             f.write(self.tagLabels[i].text())
             f.write("#")
+        self.setFocus()
     #takes a URL entered into the search bar and adds an image to the two pixmap lists.  It also appends the URL onto the saved URLs string if the user wants to save them later    
     def testClick(self):
         path = self.searchBar.text()
